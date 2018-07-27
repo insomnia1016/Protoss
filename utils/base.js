@@ -22,7 +22,7 @@ class Base {
       dataType: 'json',
       responseType: 'text',
       success: function(res) {
-        params.sCallBack && params.sCallBack(res)
+        params.sCallback && params.sCallback(res.data)
       },
       fail: function(res) {
         console.log(res)
