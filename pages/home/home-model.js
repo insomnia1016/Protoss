@@ -24,6 +24,17 @@ class Home extends Base {
     }
     this.request(params)
   }
+
+  /*最新产品*/
+  getProductsData(callback) {
+    var params = {
+      url: 'product/recent',
+      sCallback: function (data) {
+        callback && callback(data)
+      }
+    }
+    this.request(params)
+  }
 }
 export {
   Home
