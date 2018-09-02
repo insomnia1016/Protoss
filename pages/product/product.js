@@ -1,6 +1,8 @@
 import {
   Product
 } from 'product-model.js';
+import { Cart } from '../cart/cart-model.js';
+var cart =  new Cart()
 var product = new Product()
 Page({
 
@@ -24,6 +26,7 @@ Page({
   _loadData: function() {
     product.getDetailInfo(this.data.id, (data) => {
       this.setData({
+        cartTotalCounts: cart.getCartTotalCounts(),
         product: data
       })
     })
@@ -39,6 +42,30 @@ Page({
     var index = product.getDataSet(event,'index')
     this.setData({
       currentTabsIndex:index
+    })
+  },
+  onAddingToCartTap:function(event){
+    this.addToCart()
+    var counts = this.data.cartTotalCounts + this.data.productCounts
+    this.setData({
+      cartTotalCounts: counts
+    })
+  },
+  addToCart:function(){
+    var tempObj = {}
+    var keys = ['id','name','main_img_url','price']
+
+    for(var key in this.data.product){
+      if(keys.indexOf(key)>=0){
+        tempObj[key] = this.data.product[key]
+      }
+    }
+    cart.add(tempObj,this.data.productCounts)
+
+  },
+  onCartTap:function(event){
+    wx.switchTab({
+      url: '/pages/cart/cart',
     })
   }
 
