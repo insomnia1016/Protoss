@@ -20,10 +20,22 @@ class Cart extends Base {
     }
     wx.setStorageSync(this._storageKeyName, cartData)
   }
-  getCartDataFromLocal() {
+  /**
+   * 从缓存中读取购物车数据
+   */
+  getCartDataFromLocal(flag) {
     var res = wx.getStorageSync(this._storageKeyName)
     if (!res) {
       res = []
+    }
+    if (flag) {
+      var newRes = []
+      for (let i = 0; i < res.length; i++) {
+        if (res[i].selectStatus) {
+          newRes.push(res[i])
+        }
+      }
+      res = newRes
     }
     return res
   }
@@ -64,40 +76,40 @@ class Cart extends Base {
     return result
   }
 
-  _changeCounts(id,counts){
+  _changeCounts(id, counts) {
     var cartData = this.getCartDataFromLocal(),
-    hasInfo = this._isHasThatOne(id,cartData)
-    if(hasInfo.index != -1){
-      if(hasInfo.data.counts>=1){
+      hasInfo = this._isHasThatOne(id, cartData)
+    if (hasInfo.index != -1) {
+      if (hasInfo.data.counts >= 1) {
         cartData[hasInfo.index].counts += counts
       }
     }
-    wx.setStorageSync(this._storageKeyName,cartData)
+    wx.setStorageSync(this._storageKeyName, cartData)
   }
 
-  addCounts(id){
-    this._changeCounts(id,1)
+  addCounts(id) {
+    this._changeCounts(id, 1)
   }
 
-  cutCounts(id){
-    this._changeCounts(id,-1)
+  cutCounts(id) {
+    this._changeCounts(id, -1)
   }
 
-  delete(ids){
-    if(!(ids instanceof Array)){
+  delete(ids) {
+    if (!(ids instanceof Array)) {
       ids = [ids]
     }
     var cartData = this.getCartDataFromLocal()
-    for(let i = 0; i< ids.length;i++){
-      var hasInfo = this._isHasThatOne(ids[i],cartData)
-      if(hasInfo.index != -1){
-        cartData.splice(hasInfo.index,1)
+    for (let i = 0; i < ids.length; i++) {
+      var hasInfo = this._isHasThatOne(ids[i], cartData)
+      if (hasInfo.index != -1) {
+        cartData.splice(hasInfo.index, 1)
       }
     }
-    wx.setStorageSync(this._storageKeyName,cartData)
+    wx.setStorageSync(this._storageKeyName, cartData)
   }
 
-  execSetStorageSync(data){
+  execSetStorageSync(data) {
     wx.setStorageSync(this._storageKeyName, data)
   }
 
