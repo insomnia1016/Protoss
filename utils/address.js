@@ -24,6 +24,19 @@ class Address extends Base{
     var flag = centerCitys.indexOf(name) >= 0 
     return flag
   }
+  getAddress(callback){
+    var that = this
+    var param = {
+      url:'address',
+      sCallback:function(res){
+        if(res){
+          res.totalDetail = that.setAddressInfo(res)
+          callback && callback(res)
+        }
+      }
+    }
+    this.request(param)
+  }
   /*保存地址*/
   _setUpAddress(res){
     var formData = {

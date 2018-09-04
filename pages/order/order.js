@@ -32,6 +32,9 @@ Page({
       account: this.data.account,
       orderStatus: 0
     })
+    address.getAddress((res)=>{
+      this._bindAddressInfo(res)
+    })
   },
 
   /*修改或者添加地址信息*/
@@ -82,4 +85,15 @@ Page({
       }
     })
   },
+  pay:function(){
+    if(!this.data.addressInfo){
+      this.showTips('下单提示','请填写您的收货地址')
+      return
+    }
+    if(this.data.orderStatus == 0){
+      this._firstTimePay()
+    }else{
+      this._oneMoreTimePay()
+    }
+  }
 })
