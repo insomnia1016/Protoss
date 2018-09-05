@@ -5,23 +5,7 @@ class My extends Base {
     super()
   }
 
-  getUserInfo(cb){
-    wx.login({
-      success:function(){
-        wx.getUserInfo({
-          success:function(res){
-            typeof cb == 'function' && cb(res)
-          },
-          fail:function(res){
-            typeof cb == 'function'  && cb({
-              avatarUrl: '../../imgs/icon/user@default.png',
-              nickName: '零食小贩'
-            })
-          }
-        })
-      }
-    })  
-  }
+ 
 }
 
 export {My}

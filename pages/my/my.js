@@ -18,14 +18,21 @@ Page({
    */
   onLoad: function (options) {
     this._loadData()
+    this._getAddressInfo()
   },
   _loadData:function(){
-    my.getUserInfo((data)=>{
-      this.setData({
-        userInfo:data
-      })
+    
+  },
+  _getAddressInfo:function(){
+    address.getAddress((addressInfo)=>{
+      this._bindAddressInfo(addressInfo)
     })
-  }
+  },
+  _bindAddressInfo: function (addressInfo) {
+    this.setData({
+      addressInfo: addressInfo
+    })
+  },
 
  
 })
