@@ -1,13 +1,14 @@
 import {
   Cart
 } from '../cart/cart-model.js';
+
 import {
   Address
 } from '../../utils/address.js';
-// import {
-//   Order
-// } from 'order-model.js';
-// var order = new Order()
+import {
+  Order
+} from 'order-model.js';
+var order = new Order()
 var address = new Address()
 var cart = new Cart()
 Page({
@@ -16,7 +17,8 @@ Page({
    * 页面的初始数据
    */
   data: {
-
+    id: null,
+    addressInfo:null
   },
 
   /**
@@ -32,9 +34,33 @@ Page({
       account: this.data.account,
       orderStatus: 0
     })
-    address.getAddress((res)=>{
+    address.getAddress((res) => {
       this._bindAddressInfo(res)
     })
+  },
+
+  onShow: function() {
+    if (this.data.id) {
+      var that = this
+      //下单后，支付成功或者失败后，点左上角返回时能够更新订单状态 所以放在onshow中
+      var id = this.data.id
+      order.getOrderInfoById(id, (data) => {
+        that.setData({
+          orderStatus: data.status,
+          productsArr: data.snap_items,
+          account: data.total_price,
+          basicInfo: {
+            orderTime: data.create_time,
+            orderNo: data.order_no
+          }
+        })
+      })
+
+      // 快照地址
+      var addressInfo = data.snap_address
+      addressInfo.totalDetail = address.setAddressInfo(addressInfo)
+      that._bindAddressInfo(addressInfo)
+    }
   },
 
   /*修改或者添加地址信息*/
@@ -75,9 +101,9 @@ Page({
     wx.showModal({
       title: title,
       content: content,
-      showCancel:false,
-      success:function(res){
-        if(flag){
+      showCancel: false,
+      success: function(res) {
+        if (flag) {
           wx.switchTab({
             url: '/pages/my/my',
           })
@@ -85,15 +111,96 @@ Page({
       }
     })
   },
-  pay:function(){
-    if(!this.data.addressInfo){
-      this.showTips('下单提示','请填写您的收货地址')
+  pay: function() {
+    if (!this.data.addressInfo) {
+      this.showTips('下单提示', '请填写您的收货地址')
       return
     }
-    if(this.data.orderStatus == 0){
+    if (this.data.orderStatus == 0) {
       this._firstTimePay()
-    }else{
+    } else {
       this._oneMoreTimePay()
     }
+  },
+  _firstTimePay: function() {
+    var orderInfo = [],
+      productInfo = this.data.productsArr,
+      order = new Order()
+    for (let i = 0; i < productInfo.length; i++) {
+      orderInfo.push({
+        product_id: productInfo[i].id,
+        count: productInfo[i].counts
+      })
+    }
+
+    var that = this
+    order.doOrder(orderInfo, (data) => {
+      if (data.pass) {
+        var id = data.order_id
+        that.data_id = id
+        that._execPay(id)
+      } else {
+        that._orderFail(data)
+      }
+    })
+  },
+  _oneMoreTimePay: function() {
+    this._execPay(this.data.id)
+  },
+
+  /*
+   *下单失败
+   * params:
+   * data - {obj} 订单结果信息
+   * */
+  _orderFail: function(data) {
+    var nameArr = [],
+      name = '',
+      str = '',
+      pArr = data.pStatusArray
+    for (let i = 0; i < pArr.length; i++) {
+      if (!pArr[i].haveStock) {
+        name = pArr[i].name
+        if (name.length > 15) {
+          name = name.substr(0, 12) + '...'
+        }
+        nameArr.push(name)
+        if (nameArr.length >= 2) {
+          break
+        }
+      }
+    }
+    str += nameArr.join('、')
+    if (nameArr.length > 2) {
+      str += ' 等'
+    }
+    str += ' 缺货'
+    wx.showModal({
+      title: '下单失败',
+      content: str,
+      showCancel: false
+    })
+  },
+  _execPay: function(id) {
+
+    order.execPay(id, (statusCode) => {
+      if (statusCode != 0) {
+        //将已经下单的商品从购物车删除 
+        this.deleteProducts()
+        var flag = statusCode == 2
+        wx.navigateTo({
+          url: '../pay-result/pay-result?id=' + id + '&flag=' + flag + 'from=order',
+        })
+      }
+    })
+  },
+
+  deleteProducts: function() {
+    var ids = [],
+      arr = this.data.productsArr
+    for (let i = 0; i < arr.length; i++) {
+      ids.push(arr[i].id)
+    }
+    cart.delete(ids)
   }
 })
