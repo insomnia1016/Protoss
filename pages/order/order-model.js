@@ -78,6 +78,19 @@ class Order extends Base {
     this.request(allParams)
   }
 
+  /*获得所有订单,pageIndex 从1开始*/
+  getOrders(pageIndex,callback){
+    var allParams = {
+      url:'by_user',
+      type:'get',
+      data:{page:pageIndex},
+      sCallback:function(data){
+        callback && callback(data) //1 未支付  2，已支付  3，已发货，4已支付，但库存不足
+      }
+    }
+    this.request(allParams)
+  }
+
    /*本地缓存 保存／更新*/
   execSetStorageSync(data) {
     wx.setStorageSync(this._storageKeyName, data)

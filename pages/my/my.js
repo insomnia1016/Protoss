@@ -10,7 +10,9 @@ Page({
    * 页面的初始数据
    */
   data: {
-  
+    pageIndex:1,
+    orderArr:[],
+    isLoadedAll:false
   },
 
   /**
@@ -21,7 +23,7 @@ Page({
     this._getAddressInfo()
   },
   _loadData:function(){
-    
+    this._getOrders();
   },
   _getAddressInfo:function(){
     address.getAddress((addressInfo)=>{
@@ -33,6 +35,31 @@ Page({
       addressInfo: addressInfo
     })
   },
-
+  _getOrders:function(){
+    order.getOrders(this.data.pageIndex,(res)=>{
+      var data = res.data
+      if(data.length > 0){
+        this.data.orderArr.push.apply(this.data.orderArr,res.data)
+        this.setData({
+          orderArr: this.data.orderArr
+        })
+      }else{
+        this.data.isLoadedAll = true
+      }
+     
+    })
+  },
+  onReachBottom:function(){
+    if(!this.data.isLoadedAll){
+      this.data.pageIndex++
+      this._getOrders()
+    }
+  },
+  showOrderDetailInfo:function(event){
+    var id = my.getDataSet(event,'id')
+    wx.navigateTo({
+      url: '../order/order?from=order&id='+ id,
+    })
+  }
  
 })
