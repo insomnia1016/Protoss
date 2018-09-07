@@ -27,6 +27,7 @@ class Category extends Base {
     }
     this.request(param)
   }
+
 }
 export {
   Category
