@@ -81,7 +81,7 @@ class Order extends Base {
   /*获得所有订单,pageIndex 从1开始*/
   getOrders(pageIndex, callback) {
     var allParams = {
-      url: 'by_user',
+      url: 'order/by_user',
       type: 'get',
       data: {
         page: pageIndex
